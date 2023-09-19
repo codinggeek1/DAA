@@ -1,70 +1,94 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #define INFINITY 9999
-#define MAX 5
 
-void Dijkstra(int Graph[MAX][MAX], int n, int start) {
-  int cost[MAX][MAX], distance[MAX], pred[MAX];
-  int visited[MAX], count, mindistance, nextnode, i, j;
+void Dijkstra(int** Graph, int n, int start) {
+    int* distance = (int*)malloc(n * sizeof(int));
+    int* pred = (int*)malloc(n * sizeof(int));
+    int* visited = (int*)malloc(n * sizeof(int));
+    int count, mindistance, nextnode, i, j;
 
-  // Creating cost matrix
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
-      if (Graph[i][j] == 0)
-        cost[i][j] = INFINITY;
-      else
-        cost[i][j] = Graph[i][j];
-
-  for (i = 0; i < n; i++) {
-    distance[i] = cost[start][i];
-    pred[i] = start;
-    visited[i] = 0;
-  }
-
-  distance[start] = 0;
-  visited[start] = 1;
-  count = 1;
-  mindistance = INFINITY; // Initialize mindistance here
-
-  while (count < n - 1) {
-    mindistance = INFINITY; // Move this line inside the while loop
-
-    for (i = 0; i < n; i++)
-      if (distance[i] < mindistance && !visited[i]) {
-        mindistance = distance[i];
-        nextnode = i;
-      }
-
-    visited[nextnode] = 1;
-    for (i = 0; i < n; i++)
-      if (!visited[i])
-        if (mindistance + cost[nextnode][i] < distance[i]) {
-          distance[i] = mindistance + cost[nextnode][i];
-          pred[i] = nextnode;
+    // Initialize the cost matrix
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            if (Graph[i][j] == 0) {
+                Graph[i][j] = INFINITY;
+            }
         }
-    count++;
-  }
-
-  // Printing the distance
-  for (i = 0; i < n; i++)
-    if (i != start) {
-      printf("\nDistance from source to %d: %d", i, distance[i]);
     }
+
+    for (i = 0; i < n; i++) {
+        distance[i] = Graph[start][i];
+        pred[i] = start;
+        visited[i] = 0;
+    }
+
+    distance[start] = 0;
+    visited[start] = 1;
+    count = 1;
+    mindistance = INFINITY;
+
+    while (count < n - 1) {
+        mindistance = INFINITY;
+
+        for (i = 0; i < n; i++) {
+            if (distance[i] < mindistance && !visited[i]) {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+        }
+
+        visited[nextnode] = 1;
+        for (i = 0; i < n; i++) {
+            if (!visited[i] && mindistance + Graph[nextnode][i] < distance[i]) {
+                distance[i] = mindistance + Graph[nextnode][i];
+                pred[i] = nextnode;
+            }
+        }
+        count++;
+    }
+
+    // Printing the distance
+    for (i = 0; i < n; i++) {
+        if (i != start) {
+            printf("\nDistance from source to %d: %d", i, distance[i]);
+        }
+    }
+
+    // Free allocated memory
+    free(distance);
+    free(pred);
+    free(visited);
 }
 
 int main() {
-  int i, j, n, u;
-  n = 5;
-  int Graph[5][5] = {
-    {0, 9, 75, 0, 0},
-    {9, 0, 95, 19, 42},
-    {75, 95, 0, 51, 66},
-    {0, 19, 51, 0, 31},
-    {0, 42, 66, 31, 0}
-  };
+    int i, j, n, u;
+    printf("Enter the number of nodes: ");
+    scanf("%d", &n);
 
-  u = 0;
+    int** Graph = (int**)malloc(n * sizeof(int*));
+    for (i = 0; i < n; i++) {
+        Graph[i] = (int*)malloc(n * sizeof(int));
+    }
 
-  Dijkstra(Graph, n, u);
+    printf("Enter the adjacency matrix:\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            scanf("%d", &Graph[i][j]);
+        }
+    }
 
-  return 0;
+    printf("Enter the starting node: ");
+    scanf("%d", &u);
+
+    Dijkstra(Graph, n, u);
+
+    // Free allocated memory
+    for (i = 0; i < n; i++) {
+        free(Graph[i]);
+    }
+    free(Graph);
+
+    return 0;
 }
