@@ -65,8 +65,8 @@ int main() {
 
     int a = uniqueness(arr);
     if (a == 1)
-        printf("\nNot unique");
+        printf("\nNot unique\n");
     else
-        printf("\nUnique");
+        printf("\nUnique\n");
     return 0;
 }

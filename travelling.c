@@ -1,119 +1,79 @@
-    /*Branch and Bound Algorithm for Travelling Sales Person*/
+#include <stdio.h>
+#include <limits.h>
 
-    #include<stdio.h>
+#define V 4
 
-    //#include<conio.h>
+int travllingSalesmanProblem(int graph[V][V], int s, int path[V]);
+void swap(int *x, int *y);
+void permute(int *array, int start, int end, int graph[V][V], int source, int *min_path, int path[V]);
 
-    int a[10][10], visited[10], n, cost = 0;
+int main() {
+    // Matrix representation of the graph
+    int graph[V][V] = {{0, 10, 15, 20},
+                      {10, 0, 35, 25},
+                      {15, 35, 0, 30},
+                      {20, 25, 30, 0}};
+    int s = 0;
+    int path[V];
+    int min_path = travllingSalesmanProblem(graph, s, path);
 
-    void get() {
+    printf("TSP Path: ");
+    for (int i = 0; i < V; i++) {
+        printf("%d -> ", path[i]);
+    }
+    printf("%d\n", path[0]); // Return to the starting point
+    printf("Minimum Weight: %d\n", min_path);
+    
+    return 0;
+}
 
-        int i, j;
-
-        printf("Enter No. of Cities: ");
-
-        scanf("%d", &n);
-
-        printf("\nEnter Cost Matrix: \n");
-
-        for (i = 0; i < n; i++) {
-
-            printf("\n Enter Elements of Row# : %d\n", i + 1);
-
-            for (j = 0; j < n; j++)
-
-                scanf("%d", &a[i][j]);
-
-            visited[i] = 0;
-
+int travllingSalesmanProblem(int graph[V][V], int s, int path[V]) {
+    int vertex[V - 1];
+    int count = 0;
+    for (int i = 0; i < V; i++) {
+        if (i != s) {
+            vertex[count] = i;
+            count++;
         }
+    }
 
-        printf("\n\nThe cost list is:\n\n");
+    int min_path = INT_MAX;
+    permute(vertex, 0, V - 2, graph, s, &min_path, path);
 
-        for (i = 0; i < n; i++) {
+    return min_path;
+}
 
-            printf("\n\n");
+void swap(int *x, int *y) {
+    int temp;
+    temp = *x;
+    *x = *y;
+    *y = temp;
+}
 
-            for (j = 0; j < n; j++)
+void permute(int *array, int start, int end, int graph[V][V], int source, int *min_path, int path[V]) {
+    if (start == end) {
+        int current_pathweight = 0;
+        int k = source;
 
-                printf("\t % d", a[i][j]);
-
+        for (int i = 0; i <= end; i++) {
+            current_pathweight += graph[k][array[i]];
+            k = array[i];
         }
+        current_pathweight += graph[k][source];
 
-    }
-
-    void mincost(int city) {
-
-        int i, ncity;
-
-        visited[city] = 1;
-
-        printf("%d –>", city + 1);
-
-        ncity = least(city);
-
-        if (ncity == 999) {
-
-            ncity = 0;
-
-            printf("%d", ncity + 1);
-
-            cost += a[city][ncity];
-
-            return;
-
+        if (current_pathweight < *min_path) {
+            *min_path = current_pathweight;
+            // Copy the path to 'path' array
+            path[0] = source;
+            for (int i = 0; i <= end; i++) {
+                path[i + 1] = array[i];
+            }
         }
-
-        mincost(ncity);
-
-    }
-
-    int least(int c) {
-
-        int i, nc = 999;
-
-        int min = 999, kmin;
-
-        for (i = 0; i < n; i++) {
-
-            if ((a[c][i] != 0) && (visited[i] == 0))
-
-                if (a[c][i] < min) {
-
-                    min = a[i][0] + a[c][i];
-
-                    kmin = a[c][i];
-
-                    nc = i;
-
-                }
-
+    } else {
+        for (int i = start; i <= end; i++) {
+            swap((array + start), (array + i));
+            permute(array, start + 1, end, graph, source, min_path, path);
+            swap((array + start), (array + i)); // backtrack
         }
-
-        if (min != 999)
-
-            cost += kmin;
-
-        return nc;
-
     }
-
-    void put() {
-
-        printf("\n\nMinimum cost:");
-
-        printf("%d", cost);
-
-    }
-
-    void main() {
-
-        get();
-
-        printf("\n\nThe Path is:\n\n");
-
-        mincost(0);
-
-        put();
-
-    }
+}
